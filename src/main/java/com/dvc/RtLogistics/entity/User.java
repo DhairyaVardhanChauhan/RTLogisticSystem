@@ -12,6 +12,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Entity
 @Table(name = "users")
+@Builder
 public class User {
 
     @Id
@@ -19,6 +20,8 @@ public class User {
     private String userId;
     private String userName;
     private String password;
+    private String email;
+    private String phone;
 
     @ManyToMany
     @JoinTable(
