@@ -4,11 +4,15 @@ import com.dvc.RtLogistics.dto.Token;
 import com.dvc.RtLogistics.dto.UserInfoDto;
 import com.dvc.RtLogistics.entity.RefreshToken;
 import com.dvc.RtLogistics.entity.User;
+import com.dvc.RtLogistics.entity.UserRole;
+import com.dvc.RtLogistics.repository.RolesRepository;
 import com.dvc.RtLogistics.repository.UserRepository;
 import com.dvc.RtLogistics.sercured.CustomUserDetails;
+import com.dvc.RtLogistics.utils.Constants;
 import com.dvc.RtLogistics.utils.JwtUtils;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.util.bcel.Const;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -28,7 +33,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
     private final RefreshTokenService refreshTokenService;
-
+    private final RolesRepository rolesRepository;
+    private final Constants constants = new Constants();
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUserName(username).orElseThrow(()->new UsernameNotFoundException("User does not exist!"));
@@ -38,6 +44,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public ResponseEntity validateAndSignUpUser(UserInfoDto requestBody) {
 
             Optional<User> user = userRepository.findByUserName(requestBody.getUsername());
+            UserRole role =  rolesRepository.findByName(Constants.USER).orElseThrow(()-> new RuntimeException("Role not found!"));
             if(user.isPresent()){
                 return new ResponseEntity<>("Already Exists", HttpStatus.BAD_REQUEST);
             }
@@ -48,6 +55,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                             .password(passwordEncoder.encode(requestBody.getPassword()))
                         .email(requestBody.getEmail())
                         .phone(requestBody.getPhoneNumber())
+                        .roles(Set.of(role))
                             .build();
                     userRepository.save(user1);
 

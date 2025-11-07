@@ -13,10 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,7 +25,7 @@ public class AuthController {
     private final RefreshTokenService refreshTokenService;
     private final JwtUtils jwtUtils;
 
-    @GetMapping("/signup")
+    @PostMapping("/signup")
     public ResponseEntity signUp(@RequestBody UserInfoDto requestBody){
         try{
             return customUserDetailsService.validateAndSignUpUser(requestBody);
@@ -38,7 +35,7 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/login")
+    @PostMapping("/login")
     public ResponseEntity login(@RequestBody LoginDetails loginDetails){
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDetails.getUsername(),loginDetails.getPassword()));
         if(authentication.isAuthenticated()){

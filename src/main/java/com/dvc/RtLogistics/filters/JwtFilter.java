@@ -1,6 +1,7 @@
 package com.dvc.RtLogistics.filters;
 
 import com.dvc.RtLogistics.sercured.CustomUserDetails;
+import com.dvc.RtLogistics.service.authServices.CustomUserDetailsService;
 import com.dvc.RtLogistics.utils.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -24,13 +25,13 @@ import java.io.IOException;
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
-    private final UserDetailsService userDetailsService;
+    private final CustomUserDetailsService userDetailsService;
 
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
          String username = null;
-         String token = request.getHeaders("Authorization").toString();
+         String token = request.getHeader("Authorization");
 
          if(token != null && token.startsWith("Bearer ")){
              token = token.substring(7);
@@ -40,7 +41,7 @@ public class JwtFilter extends OncePerRequestFilter {
         if(username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             if(jwtUtils.validateToken(userDetails, token)){
-                Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(),userDetails.getPassword());
+                Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(),userDetails.getPassword(),userDetails.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }
